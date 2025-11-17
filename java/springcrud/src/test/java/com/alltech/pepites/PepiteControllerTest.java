@@ -1,14 +1,11 @@
-package com.alltech;
+package com.alltech.pepites;
 
-import com.alltech.pepites.Pepite;
-import com.alltech.pepites.PepiteService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
@@ -28,13 +25,11 @@ public class PepiteControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private PepiteService pepiteService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @Test
-    void createPepite_ReturnsCreatedPepite() throws Exception {
+    void createPepite_ReturnsCreatedPepiteDto() throws Exception {
         String jsonContent = """
         {
           "nom": "Jean",
@@ -43,13 +38,13 @@ public class PepiteControllerTest {
         }
         """;
 
-        Pepite savedPepite = Pepite.builder()
+        PepiteDto savedDto = PepiteDto.builder()
                 .nom("Jean")
                 .prenom("Dupont")
                 .dateNaissance(Instant.parse("1987-04-21T00:00:00Z"))
                 .build();
 
-        Mockito.when(pepiteService.savePepite(any(PepiteDto.class))).thenReturn(Optional.of(savedPepite));
+        Mockito.when(pepiteService.savePepite(any(PepiteDto.class))).thenReturn(Optional.of(savedDto));
 
         mockMvc.perform(post("/pepites")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -59,26 +54,23 @@ public class PepiteControllerTest {
                 .andExpect(jsonPath("$.prenom").value("Dupont"));
     }
 
-
     @Test
-    void getAllPepites_ReturnsList() throws Exception {
-        Pepite pepite1 = new Pepite();
-        pepite1.setNom("Jean");
-        Pepite pepite2 = new Pepite();
-        pepite2.setNom("Marie");
+    void getAllPepites_ReturnsListOfDto() throws Exception {
+        PepiteDto dto1 = PepiteDto.builder().nom("Jean").build();
+        PepiteDto dto2 = PepiteDto.builder().nom("Marie").build();
 
-        List<Pepite> pepites = Arrays.asList(pepite1, pepite2);
-        Mockito.when(pepiteService.getAllPepites()).thenReturn(pepites);
+        List<PepiteDto> dtos = Arrays.asList(dto1, dto2);
+        Mockito.when(pepiteService.getAllPepites()).thenReturn(dtos);
 
         mockMvc.perform(get("/pepites"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(pepites.size()))
+                .andExpect(jsonPath("$.length()").value(dtos.size()))
                 .andExpect(jsonPath("$[0].nom").value("Jean"))
                 .andExpect(jsonPath("$[1].nom").value("Marie"));
     }
 
     @Test
-    void updatePepite_ReturnsUpdated() throws Exception {
+    void updatePepite_ReturnsUpdatedDto() throws Exception {
         Long id = 1L;
         String jsonContent = """
         {
@@ -88,13 +80,13 @@ public class PepiteControllerTest {
         }
         """;
 
-        Pepite update = Pepite.builder()
+        PepiteDto updatedDto = PepiteDto.builder()
                 .nom("Updated")
                 .prenom("Nom")
                 .dateNaissance(Instant.parse("1988-11-17T00:00:00Z"))
                 .build();
 
-        Mockito.when(pepiteService.updatePepite(any(PepiteDto.class), eq(id))).thenReturn(Optional.of(update));
+        Mockito.when(pepiteService.updatePepite(any(PepiteDto.class), eq(id))).thenReturn(Optional.of(updatedDto));
 
         mockMvc.perform(put("/pepites/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -106,13 +98,19 @@ public class PepiteControllerTest {
     @Test
     void updatePepite_NotFound_ReturnsNotFound() throws Exception {
         Long id = 99L;
-        Pepite update = new Pepite();
+        String jsonContent = """
+        {
+          "nom": "NotFound",
+          "prenom": "None",
+          "dateNaissance": "01-01-2000"
+        }
+        """;
 
         Mockito.when(pepiteService.updatePepite(any(PepiteDto.class), eq(id))).thenReturn(Optional.empty());
 
         mockMvc.perform(put("/pepites/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(update)))
+                        .content(jsonContent))
                 .andExpect(status().isNotFound());
     }
 
