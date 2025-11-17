@@ -6,7 +6,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,9 +28,9 @@ public class PepiteController {
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Pepite> updatePepite(@RequestBody Pepite pepite,
+    public ResponseEntity<Pepite> updatePepite(@Valid @RequestBody PepiteDto pepiteDto,
                                                @PathVariable("id") Long id) {
-        return ResponseEntity.of(pepiteService.updatePepite(pepite, id));
+        return ResponseEntity.of(pepiteService.updatePepite(pepiteDto, id));
     }
 
     @DeleteMapping("/{id}")

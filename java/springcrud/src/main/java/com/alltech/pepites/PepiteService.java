@@ -33,13 +33,13 @@ public class PepiteService {
                 .toList();
     }
 
-    public Optional<Pepite> updatePepite(Pepite pepite, Long id) {
+    public Optional<Pepite> updatePepite(PepiteDto pepiteDto, Long id) {
         Optional<Pepite> pepiteRepo = Optional.of(pepiteRepository.findById(id)).get();
         if (pepiteRepo.isPresent()) {
             Pepite pepite1 = pepiteRepo.get();
-            pepite1.setNom(pepite.getNom());
-            pepite1.setPrenom(pepite.getNom());
-            pepite1.setDateNaissance(pepite.getDateNaissance());
+            pepite1.setNom(pepiteDto.getNom());
+            pepite1.setPrenom(pepiteDto.getNom());
+            pepite1.setDateNaissance(pepiteDto.getDateNaissance());
             return Optional.of(pepiteRepository.save(pepite1));
         }
         return Optional.empty();
