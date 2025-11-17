@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/pepites")
@@ -22,10 +21,12 @@ public class PepiteController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
+
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<PepiteDto> getAllPepites() {
         return pepiteService.getAllPepites();
     }
+
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PepiteDto> updatePepite(@Valid @RequestBody PepiteDto pepiteDto,
                                                   @PathVariable("id") Long id) {
@@ -33,10 +34,12 @@ public class PepiteController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
     @DeleteMapping("/{id}")
     public void deletePepiteById(@PathVariable("id") Long id) {
         pepiteService.deleteById(id);
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<PepiteDto> getPepite(@PathVariable("id") Long id) {
        return ResponseEntity.of(pepiteService.get(id));
